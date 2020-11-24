@@ -13,11 +13,11 @@ class DataGenerator:
     routeIndex: 0 ~ routes_num-1
     """
     def __init__(self, cars_num = 15, routes_num = 5, blocks_num = 9, drawOnlyRoutes = False):
-        self.width  = 30000
-        self.height = 30000
+        self.width  = 15000
+        self.height = 15000
         self.blocks_num = blocks_num
-        self.blocks_width = self.width / 3
-        self.blocks_height = self.height / 3
+        self.blocks_width = self.width // 3
+        self.blocks_height = self.height // 3
         self.routes_num = routes_num
         self.cars_num = cars_num
         self.base_speed = 10
