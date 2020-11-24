@@ -9,8 +9,8 @@ class DataGenerator:
     fast: 1, 3, 7, 9
     medium: 2, 4, 6, 8
     slow: 5
-    carIndex: 0 ~ cars_num
-    routeIndex: 0 ~ routes_num
+    carIndex: 0 ~ cars_num-1
+    routeIndex: 0 ~ routes_num-1
     """
     def __init__(self, cars_num = 15, routes_num = 5, blocks_num = 9, drawOnlyRoutes = False):
         self.width  = 30000
@@ -66,7 +66,7 @@ class DataGenerator:
     
     def reassembleCars(self):
         for i in range(self.cars_num):
-            new_route = random.randint(0, self.routes_num)
+            new_route = random.randint(0, self.routes_num-1)
             new_phase = random.randint(0, 3)
             x, y = self.routes[new_route].random_select(new_phase)
             self.cars[i].posX = x
@@ -80,9 +80,9 @@ class DataGenerator:
             3: self.base_speed + self.speed_threshold,
             4: self.base_speed,
             5: self.base_speed - self.speed_threshold,
-            6: self.base_speed
+            6: self.base_speed,
             7: self.base_speed + self.speed_threshold,
-            8: self.base_speed
+            8: self.base_speed,
             9: self.base_speed + self.speed_threshold
         }
 
