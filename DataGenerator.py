@@ -9,6 +9,8 @@ class DataGenerator:
     fast: 1, 3, 7, 9
     medium: 2, 4, 6, 8
     slow: 5
+    carIndex: 0 ~ cars_num
+    routeIndex: 0 ~ routes_num
     """
     def __init__(self, cars_num = 15, routes_num = 5, blocks_num = 9, drawOnlyRoutes = False):
         self.width  = 30000
@@ -19,16 +21,18 @@ class DataGenerator:
         self.routes_num = routes_num
         self.cars_num = cars_num
         self.base_speed = 10
+        self.speed_threshold = 1
         self.stage_num = 3
         self.stage_time = 1800
-        self.routes = self.init_routes()     
-        self.cars = self.init_cars()
+        self.routes = self.initRoutes()     
+        self.cars = self.initCars()
+        self.initSpeed()
         if drawOnlyRoutes:
             self.drawRoutes()
         self.drawRoutesAndCars()
         self.generate()
     
-    def init_routes(self):
+    def initRoutes(self):
         routes_block = random.sample(range(1, self.blocks_num+1), min(self.routes_num, self.blocks_num))
         result = {}
         for i in range(self.routes_num):
@@ -47,7 +51,7 @@ class DataGenerator:
             result[i] = Route(x, y, w, h, True)
         return result
 
-    def init_cars(self):
+    def initCars(self):
         result = {}
         cars_per_route = self.cars_num // self.routes_num
         for i in range(self.routes_num):
@@ -57,8 +61,30 @@ class DataGenerator:
                 phase = j % 4
                 r = self.routes[i]
                 x, y = r.random_select(phase)
-                result[carID] = Car(carID, x, y, r.clockwise, i)
-        return result                
+                result[carID] = Car(carID, x, y, i)
+        return result  
+    
+    def reassembleCars(self):
+        for i in range(self.cars_num):
+            new_route = random.randint(0, self.routes_num)
+            new_phase = random.randint(0, 3)
+            x, y = self.routes[new_route].random_select(new_phase)
+            self.cars[i].posX = x
+            self.cars[i].posY = y
+            self.cars[i].route = new_route
+
+    def initSpeed(self):
+        self.speed = {
+            1: self.base_speed + self.speed_threshold,
+            2: self.base_speed,
+            3: self.base_speed + self.speed_threshold,
+            4: self.base_speed,
+            5: self.base_speed - self.speed_threshold,
+            6: self.base_speed
+            7: self.base_speed + self.speed_threshold,
+            8: self.base_speed
+            9: self.base_speed + self.speed_threshold
+        }
 
     def generate(self):
         for i in range(self.stage_num):
@@ -68,7 +94,92 @@ class DataGenerator:
                         print(s, j, self.cars[j].posX, self.cars[j].posY, file=f)
                         car = self.cars[j]
                         route = self.routes[car.route]
-                        if car.clockwise:
+                        block = self.getBlock(car.posX, car.posY)
+                        speed = self.speed[block]
+                        if route.clockwise:
+                            if car.phase == 0:
+                                if car.posY + speed <= route.coord["y1"]:
+                                    car.posY += speed
+                                else:
+                                    car.posY = route.coord["y1"]
+                                    car.posX += (car.posY + speed - route.coord["y1"])
+                                    car.phase = 1
+                            elif car.phase == 1:
+                                if car.posX + speed <= route.coord["x2"]:
+                                    car.posX += speed
+                                else:
+                                    car.posX = route.coord["x2"]
+                                    car.posY -= (car.posX + speed - route.coord["x2"])
+                                    car.phase = 2
+                            elif car.phase == 2:
+                                if car.posY - speed >= route.coord["y3"]:
+                                    car.posY -= speed
+                                else:
+                                    car.posY = route.coord["y3"]
+                                    car.posX += (car.posY - speed - route.coord["y3"])
+                                    car.phase = 3
+                            elif car.phase == 3:
+                                if car.posX - speed >= route.coord["x0"]:
+                                    car.posX -= speed
+                                else:
+                                    car.posX = route.coord["x0"]
+                                    car.posY -= (car.posX - speed - route.coord["x0"])
+                                    car.phase = 0
+                        else:
+                            if car.phase == 0:
+                                if car.posY - speed >= route.coord["y0"]:
+                                    car.posY -= speed
+                                else:
+                                    car.posY = route.coord["y0"]
+                                    car.posX -= (car.posY - speed - route.coord["y0"])
+                                    car.phase = 3
+                            elif car.phase == 1:
+                                if car.posX - speed >= route.coord["x1"]:
+                                    car.posX -= speed
+                                else:
+                                    car.posX = route.coord["x1"]
+                                    car.posY += (car.posX - speed - route.coord["x2"])
+                                    car.phase = 0
+                            elif car.phase == 2:
+                                if car.posY + speed <= route.coord["y2"]:
+                                    car.posY += speed
+                                else:
+                                    car.posY = route.coord["y2"]
+                                    car.posX -= (car.posY + speed - route.coord["y3"])
+                                    car.phase = 1
+                            elif car.phase == 3:
+                                if car.posX + speed >= route.coord["x3"]:
+                                    car.posX += speed
+                                else:
+                                    car.posX = route.coord["x3"]
+                                    car.posY += (car.posX + speed - route.coord["x0"])
+                                    car.phase = 2
+            self.reassembleCars()
+            self.base_speed = random.randint(9,11)
+            self.speed_threshold = random.randint(0,2)
+            self.initSpeed()
+
+    # Given current coordinates, find out the block 
+    def getBlock(self, x, y):
+        x1 = self.width // 3
+        x2 = self.width * 2 // 3
+        y1 = self.height // 3
+        y2 = self.height * 2 // 3
+        if x < x1: 
+            x_i = 0
+        elif x >= x1 and x < x2: 
+            x_i = 1
+        else: 
+            x_i = 2
+        
+        if y < y1: 
+            y_i = 1
+        elif y >= y1 and y < y2:
+            y_i = 2
+        else: 
+            y_i = 3 
+        
+        return x_i * 3 + y_i
                             
 
     def drawRoutesAndCars(self):
