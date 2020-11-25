@@ -32,7 +32,7 @@ python DataGenerator.py
 
 #### Stage
 每一階段結束後，假使 reassign 為 True，每台車輛將會被分配到不同的路線。\
-速度會在 9~11 之間隨機選擇一個速度，noise 會在 0~2 之間隨機選擇。 \
+速度會在 9 - 11 之間隨機選擇一個速度，noise 會在 0 - 2 之間隨機選擇。 \
 (TODO: 速度將在 base_speed-x ~ base_speed+x 之間隨機選擇)
 
 #### Route
