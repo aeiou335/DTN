@@ -14,7 +14,7 @@ class DataGenerator:
 	routeIndex: 0 ~ routes_num-1
 	"""
 	def __init__(self, width, height, routes_num, cars_num, base_speed, speed_noise, \
-				stage_num, stage_time, drawOnlyRoutes, reassemble, speedwNoise):
+				stage_num, stage_time, drawOnlyRoutes, reassign, speedwNoise):
 		self.width  = width
 		self.height = height
 		self.blocks_num = 9
@@ -30,7 +30,7 @@ class DataGenerator:
 			self.speed_noise = 0
 		self.stage_num = stage_num
 		self.stage_time = stage_time
-		self.reassemble = reassemble
+		self.reassign = reassign
 		self.routes = self.initRoutes()     
 		self.cars = self.initCars()
 		self.initSpeed()
@@ -72,7 +72,7 @@ class DataGenerator:
 				result[carID] = Car(carID, x, y, i, phase)
 		return result  
 	
-	def reassembleCars(self):
+	def reassignCars(self):
 		for i in range(self.cars_num):
 			new_route = random.randint(0, self.routes_num-1)
 			new_phase = random.randint(0, 3)
@@ -162,8 +162,8 @@ class DataGenerator:
 									car.posX = route.coord["x3"]
 									car.posY += (car.posX + speed - route.coord["x3"])
 									car.phase = 2
-			if self.reassemble:
-				self.reassembleCars()
+			if self.reassign:
+				self.reassignCars()
 			self.base_speed = random.randint(9,11)
 			if self.speedwNoise:
 				self.speed_noise = random.randint(0,2)
@@ -227,10 +227,10 @@ if __name__ == '__main__':
 	parser.add_argument('--stage_num', type=int, default = 3)
 	parser.add_argument('--stage_time', type=int, default = 1800)
 	parser.add_argument('--drawOnlyRoutes', type=bool, default = False)
-	parser.add_argument('--reassemble', type=bool, default = True)
+	parser.add_argument('--reassign', type=bool, default = True)
 	parser.add_argument('--speedwNoise', type=bool, default = True)
 	args = parser.parse_args()
 	DataGenerator(args.width, args.height,\
 				args.routes_num, args.cars_num, args.base_speed, args.speed_noise,\
 				args.stage_num, args.stage_time, args.drawOnlyRoutes,\
-				args.reassemble, args.speedwNoise)
+				args.reassign, args.speedwNoise)
