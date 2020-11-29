@@ -1,10 +1,11 @@
 import random
 class Route():
-    def __init__(self, start_posX, start_posY, width, height, clockwise):
+    def __init__(self, start_posX, start_posY, width, height, rtype, clockwise):
         self.start_posX = start_posX
         self.start_posY = start_posY
         self.width = width
         self.height = height
+        self.type = rtype # 1: square, 2: vertical line, 3: horizontal line
         self.clockwise = clockwise
         self.coord = self.init_coord()
     

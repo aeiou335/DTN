@@ -42,13 +42,18 @@ class DataGenerator:
 	def initRoutes(self):
 		routes_block = random.sample(range(1, self.blocks_num+1), min(self.routes_num, self.blocks_num))
 		result = {}
-		for i in range(self.routes_num):
+		vertical_y = random.randint(self.height // 3, self.height // 3 * 2)
+		result[0] = Route(self.blocks_width // 2, vertical_y, self.width * 2 // 3, 0, 2, 0)
+		vertical_x = random.randint(self.width // 3, self.height // 3 * 2)
+		result[1] = Route(vertical_x, self.blocks_width // 2, 0, self.height * 2 // 3, 3, 0)
+		for i in range(2, self.routes_num):
 			start_block = routes_block[i % self.blocks_num]
 			start_block_midX = (start_block-1) % 3 * self.blocks_width + self.blocks_width // 2
 			start_block_midY = (start_block-1) // 3 * self.blocks_height + self.blocks_height // 2
-			x = random.randint(start_block_midX - self.blocks_width // 5, start_block_midX + self.blocks_width // 5)
-			y = random.randint(start_block_midY - self.blocks_height // 5, start_block_midY + self.blocks_height // 5)
-			b = self.base_speed * self.stage_time / 4
+			x = random.randint(start_block_midX - self.blocks_width // 3, start_block_midX + self.blocks_width // 3)
+			y = random.randint(start_block_midY - self.blocks_height // 3, start_block_midY + self.blocks_height // 3)
+			#b = self.base_speed * self.stage_time / 4
+			b = 4500
 			w = random.randint(int(b * 0.8), int(b * 1.2))
 			h = random.randint(int(b * 0.8), int(b * 1.2))
 			if x+w > self.width:
@@ -56,7 +61,8 @@ class DataGenerator:
 			if y+h > self.height:
 				h = self.height - y
 			clockwise = random.randint(0,1)
-			result[i] = Route(x, y, w, h, clockwise)
+			print(x, y, w, h)
+			result[i] = Route(x, y, w, h, 1, clockwise)
 		return result
 
 	def initCars(self):
@@ -95,11 +101,12 @@ class DataGenerator:
 		}
 
 	def generate(self):
-		for i in range(self.stage_num):
-			with open("stage_{}.txt".format(i+1), 'w') as f: 
+		with open("stage.txt", 'w') as f: 
+			for i in range(self.stage_num):
+			#with open("stage_{}.txt".format(i+1), 'w') as f: 
 				for s in range(self.stage_time):
 					for j in range(self.cars_num):
-						f.write("{} {} {} {}\n".format(s, j, self.cars[j].posX, self.cars[j].posY))
+						f.write("{} {} {} {}\n".format(s + i * self.stage_time, j, self.cars[j].posX, self.cars[j].posY))
 						car = self.cars[j]
 						route = self.routes[car.route]
 						block = self.getBlock(car.posX, car.posY)
@@ -218,14 +225,14 @@ class DataGenerator:
 		
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--width', type=int, default = 15000)
-	parser.add_argument('--height', type=int, default = 15000)
-	parser.add_argument('--routes_num', type=int, default = 5)
-	parser.add_argument('--cars_num', type=int, default = 15)
+	parser.add_argument('--width', type=int, default = 30000)
+	parser.add_argument('--height', type=int, default = 30000)
+	parser.add_argument('--routes_num', type=int, default = 15)
+	parser.add_argument('--cars_num', type=int, default = 30)
 	parser.add_argument('--base_speed', type=int, default = 10)
 	parser.add_argument('--speed_noise', type=int, default = 1)
 	parser.add_argument('--stage_num', type=int, default = 3)
-	parser.add_argument('--stage_time', type=int, default = 1800)
+	parser.add_argument('--stage_time', type=int, default = 1200)
 	parser.add_argument('--drawOnlyRoutes', type=bool, default = False)
 	parser.add_argument('--reassign', type=bool, default = True)
 	parser.add_argument('--speedwNoise', type=bool, default = True)
